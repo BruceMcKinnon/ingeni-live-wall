@@ -63,6 +63,7 @@ random
 
 == Changelog ==
 
+
 v2020.01 - Initial version.
 
 v2020.02 - Added individual image anchor tags
