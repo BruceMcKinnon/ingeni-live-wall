@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Ingeni Live Wall
-Version: 2020.02
+Version: 2020.03
 Plugin URI: http://ingeni.net
 Author: Bruce McKinnon - ingeni.net
 Author URI: http://ingeni.net
@@ -29,7 +29,7 @@ Requires : Wordpress 3.x or newer ,PHP 5 +
 
 v2020.01 - Initial release
 v2020.02 - Individual image anchor tags
-
+v2020.03 - A couple of code typos on jQuery parameters
 
 */
 
@@ -65,7 +65,7 @@ function do_ingeni_livewall( $args ) {
 		'shuffle' => 1,
 		'start_path' => "",
 		'speed' => 3000,
-		'anim_type' => 'fadeInOut',
+		'anim_type' => "fadeInOut",
 	), $args );
 
 
@@ -86,7 +86,7 @@ function do_ingeni_livewall( $args ) {
 			$params['speed'] = 10000;
 		}
 		$interval = $params['speed'];
-		$anim_speed = intval($intervsl / 3);
+		$anim_speed = intval($interval / 3);
 
 
 //ingeni_slick_log('curr path:'.getcwd() .'|'.$params['source_path']);
@@ -139,7 +139,7 @@ function do_ingeni_livewall( $args ) {
 		$js .= 'jQuery( "#livewall" ).gridrotator( {
 			rows		: 2,
 			columns		: 6,
-			animType	: "'.$param['anim_type'].'",
+			animType	: "'.$params['anim_type'].'",
 			animSpeed	: '.$anim_speed.',
 			interval	: '.$interval.',
 			step		: 4,
