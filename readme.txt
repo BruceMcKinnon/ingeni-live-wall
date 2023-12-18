@@ -4,7 +4,7 @@ Contributors: Bruce McKinnon
 Tags: live wall
 Requires at least: 4.8
 Tested up to: 5.1.1
-Stable tag: 2020.03
+Stable tag: 2023.02
 
 A live wall of logos, sourced from a common folder.
 
@@ -58,6 +58,14 @@ rotate3d
 rotateLeftScale, rotateRightScale, rotateTopScale, rotateBottomScale
 random
 
+max_thumbs: Number of images to be rendered. Default = 6
+
+pool_thumbs: The size of the pool from which random images will be selected. Default = 10
+
+small_cols, medium_cols, large_cols: Number of columns to be rendered for small, medium and large breakpoints. Defaults are 1, 2 and 3 images horizontally.
+
+category: Category from which images are chosen. Default is empty, so use all categories.
+
 
 
 
@@ -69,3 +77,9 @@ v2020.01 - Initial version.
 v2020.02 - Added individual image anchor tags
 
 v2020.03 - A couple of code types on jQuery parameters.
+
+v2023.01 - Added large_cols, medium_cols and small_cols parameters for greater control
+	 - Added support for Woo products
+
+v2023.02 - Added the pool_thumbs parameter
+

@@ -341,7 +341,7 @@
 			}
 
 			this.showTotal = this.rows * this.columns;
-
+//console.log('sizes:'+JSON.stringify(this.options));
 		},
 		// init window resize event
 		_initEvents : function() {
@@ -382,16 +382,16 @@
 				} );
 
 			}
-
+//console.log('init over: ');
 		},
 		_visChange : function() {
-
+//console.log('vischange: ');
 			isHidden() ? clearTimeout( this.playtimeout ) : this._start();
 
 		},
 		// start rotating elements
 		_start : function() {
-
+//console.log('start: '+this.itemsTotal);
 			if( this.showTotal < this.itemsTotal && this.options.slideshow ) {
 				this._showNext();
 			}
@@ -555,11 +555,11 @@
 				delay : delay,
 				animSpeed : speed != undefined ? speed : this.options.animSpeed
 			};
-
+//console.log('anim props over: ');
 		},
 		// show next [option.step] elements
 		_showNext : function( time ) {
-
+//console.log('showNext: ');
 			var self = this;
 
 			clearTimeout( this.playtimeout );
@@ -603,7 +603,7 @@
 
 		},
 		_replace : function( $out ) {
-
+//console.log('replacing: ');
 			$out.data( 'active', true );
 
 			var self = this,

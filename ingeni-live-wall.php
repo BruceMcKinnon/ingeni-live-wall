@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Ingeni Live Wall
-Version: 2020.03
+Version: 2023.02
 Plugin URI: http://ingeni.net
 Author: Bruce McKinnon - ingeni.net
 Author URI: http://ingeni.net
@@ -9,7 +9,7 @@ Description: Animated live wall for Wordpress
 */
 
 /*
-Copyright (c) 2020 Ingeni Web Solutions
+Copyright (c) 2023 Ingeni Web Solutions
 Released under the GPL license
 http://www.gnu.org/licenses/gpl.txt
 
@@ -30,6 +30,9 @@ Requires : Wordpress 3.x or newer ,PHP 5 +
 v2020.01 - Initial release
 v2020.02 - Individual image anchor tags
 v2020.03 - A couple of code typos on jQuery parameters
+v2023.01 - Added large_cols, medium_cols and small_cols parameters for greater control
+		 - Added support for Woo products
+v2023.02 - Added the pool_thumbs parameter
 
 */
 
@@ -66,6 +69,12 @@ function do_ingeni_livewall( $args ) {
 		'start_path' => "",
 		'speed' => 3000,
 		'anim_type' => "fadeInOut",
+		'max_thumbs' => 6,
+		'pool_thumbs' => 10,
+		'small_cols' => 1,
+		'medium_cols' => 2,
+		'large_cols' => 3,
+		'category' => '',
 	), $args );
 
 
@@ -74,98 +83,150 @@ function do_ingeni_livewall( $args ) {
 
 //ingeni_slick_log('params:'.print_r($params,true));
 
-	try {
-		if ($params['start_path'] != '') {
-			chdir($params['start_path']);
-		}
+	
+	if ($params['start_path'] != '') {
+		chdir($params['start_path']);
+	}
 
-		if ($params['speed'] < 1000) {
-			$params['speed'] = 1000;
-		}
-		if ($params['speed'] > 10000) {
-			$params['speed'] = 10000;
-		}
-		$interval = $params['speed'];
-		$anim_speed = intval($interval / 3);
+	if ($params['speed'] < 1000) {
+		$params['speed'] = 1000;
+	}
+	if ($params['speed'] > 60000) {
+		$params['speed'] = 60000;
+	}
+	$interval = $params['speed'];
+	$anim_speed = intval($interval / 5);
 
 
 //ingeni_slick_log('curr path:'.getcwd() .'|'.$params['source_path']);
-		$root_dir = getcwd();
-		if (stripos($root_dir, '/wp-admin') !== FALSE ) {
-			$root_dir = str_ireplace('/wp-admin','',$root_dir);
-		}
-		$photos = scandir( $root_dir . $params['source_path']);
-		if (!$photos) {
-			throw new Exception('Error while scanning: '.$root_dir . $params['source_path']);
-		}
-	} catch (Exception $ex) {
-		if ( function_exists("ingeni_slick_log") ) {
-			ingeni_slick_log('Scanning folder '.$params['source_path'].' : '.$ex->message);
-		}
-	}
-	$home_path = get_bloginfo('url') . $params['source_path'];
 
-	$idx = 0;
-	if ($params['shuffle'] > 0) {
-		shuffle($photos);
-	}
-//ingeni_slick_log('photos to show: '.print_r($photos,true));
-
-	$sync1 = '<div id="livewall" class="ri-grid ri-grid-size-2"><img class="ri-loading-image" src="'.plugins_url('loading.gif', __FILE__).'"/><ul>';
-	foreach ($photos as $photo) {
-		if ( (strpos(strtolower($photo),'.jpg') !== false) || (strpos(strtolower($photo),'.png') !== false)  || (strpos(strtolower($photo),'.mp4') !== false) ) {		
-//ingeni_slick_log('photo to show: '.$home_path . $photo);
-
-			$tag = "0000".$idx;
-			$tag = "img_".substr($tag,strlen($tag)-4,4);
-			$sync1 .= '<li><a href="#'.$tag.'"><img id="'.$tag.'" src="'. $home_path . $photo .'"></img></a></li>';
-
-			++$idx;
-			if ( ($idx > $params['max_thumbs']) && ($params['max_thumbs'] > 0) ) {
-				break;
+	if ( $params['source_path'] != '' ) {
+		try {
+			$photos = array();
+			$root_dir = getcwd();
+			if (stripos($root_dir, '/wp-admin') !== FALSE ) {
+				$root_dir = str_ireplace('/wp-admin','',$root_dir);
+			}
+			if ( file_exists($root_dir . $params['source_path']) ) {
+				$photos = scandir( $root_dir . $params['source_path']);
+			}
+			if (!$photos) {
+				throw new Exception('Error while scanning: '.$root_dir . $params['source_path']);
+			}
+		} catch (Exception $ex) {
+			if ( function_exists("ingeni_slick_log") ) {
+				ingeni_slick_log('Scanning folder '.$params['source_path'].' : '.$ex->message);
 			}
 		}
-	}
-	$sync1 .= '</ul></div>';
+		$home_path = get_bloginfo('url') . $params['source_path'];
+
+		$idx = 0;
+		if ($params['shuffle'] > 0) {
+			shuffle($photos);
+		}
+//ingeni_slick_log('photos to show: '.print_r($photos,true));
+
+		$sync1 = '<div id="livewall" class="ri-grid ri-grid-size-2"><img class="ri-loading-image" src="'.plugins_url('loading.gif', __FILE__).'"/><ul>';
+		foreach ($photos as $photo) {
+			if ( (strpos(strtolower($photo),'.jpg') !== false) || (strpos(strtolower($photo),'.png') !== false)  || (strpos(strtolower($photo),'.mp4') !== false) ) {		
 
 
+				//$tag = "0000".$idx;
+				//$tag = "img_".substr($tag,strlen($tag)-4,4);
+				$tag = str_pad($idx, 4, '0', STR_PAD_LEFT);
+//ingeni_live_wall_log('photo to show: '.$tag.' = '.$photo);
+				$sync1 .= '<li><a href="#'.$tag.'"><img id="'.$tag.'" src="'. $home_path . $photo .'"></img></a></li>';
 
+				++$idx;
+				if ( ($idx > $params['pool_thumbs']) && ($params['max_thumbs'] > 0) ) {
+					break;
+				}
+			}
+		}
+		$sync1 .= '</ul></div>';
+	} else {
+		// Go and get the products
+		$idx = 0;
 
+		if ( ($params['max_thumbs']+2) > $params['pool_thumbs'] ) {
+			$params['pool_thumbs'] = $params['max_thumbs']+2;
+		}
+		$args = array(
+			'post_type' => 'product',
+			'post_status' => 'publish',
+			'ignore_sticky_posts' => 1,
+			'posts_per_page' => $params['pool_thumbs'],
+			'orderby' => 'rand',
+		);
 	
+		if ( $params['category'] !== '' ) {
+			array_push( $args, array ( 'category' => $params['category'] ) );
+		}
+
+
+		$products = wc_get_products( $args );
+
+		if ( $products ) {
+			$sync1 = '<div id="livewall" class="ri-grid ri-grid-size-2"><img class="ri-loading-image" src="'.plugins_url('loading.gif', __FILE__).'"/><ul>';
+
+			foreach($products as $product) {
+	
+				//$retHtml .= print_r($product,true);
+				$prod_image_url = wp_get_attachment_image_src( get_post_thumbnail_id( $product->get_id() ), 'large' );
+				$prod_url = get_permalink( $product->get_id() );
+
+				$tag = str_pad($idx, 4, '0', STR_PAD_LEFT);
+//ingeni_live_wall_log('photo to show: '.$tag.' = '.$photo);
+				$sync1 .= '<li><a href="'.$prod_url.'"><img id="'.$tag.'" src="'. $prod_image_url[0] .'"></img></a></li>';
+
+				++$idx;
+				if ( ($idx > $params['max_thumbs']) && ($params['max_thumbs'] > 0) ) {
+					break;
+				}
+			}
+			$sync1 .= '</ul></div>';
+		}
+	}
+	
+
+	$large_rows = intval($params['max_thumbs']) / intval($params['large_cols']);
+	$medium_rows = intval($params['max_thumbs']) / intval($params['medium_cols']);
+	$small_rows = intval($params['max_thumbs']) / intval($params['small_cols']);
 
 	$js = '<script type="text/javascript">';
-	$js .= 'jQuery(function() {';
-	
-		$js .= 'jQuery( "#livewall" ).gridrotator( {
-			rows		: 2,
-			columns		: 6,
+	$js .= 'jQuery(document).ready(function() {';
+
+		$js .= 'jQuery( "#livewall" ).delay(3000).gridrotator( {
+			rows		: '.$large_rows.',
+			columns		: '.$params['large_cols'].',
 			animType	: "'.$params['anim_type'].'",
 			animSpeed	: '.$anim_speed.',
 			interval	: '.$interval.',
 			step		: 4,
+			preventClick : false,
 			w1024			: {
-				rows	: 2,
-				columns	: 5
+				rows	: '.$large_rows.',
+				columns	: '.$params['large_cols'].'
 			},
 
 			w768			: {
-				rows	: 2,
-				columns	: 4
+				rows	: '.$medium_rows.',
+				columns	: '.$params['medium_cols'].'
 			},
 
 			w480			: {
-				rows	: 2,
-				columns	: 2
+				rows	: '.$medium_rows.',
+				columns	: '.$params['medium_cols'].'
 			},
 
 			w320			: {
-				rows	: 2,
-				columns	: 1
+				rows	: '.$small_rows.',
+				columns	: '.$params['small_cols'].'
 			},
 
 			w240			: {
-				rows	: 2,
-				columns	: 1
+				rows	: '.$small_rows.',
+				columns	: '.$params['small_cols'].'
 			},
 		} );';
 	
@@ -174,6 +235,8 @@ function do_ingeni_livewall( $args ) {
 
 	return '<div class="'.$params['wrapper_class'].'">'.$sync1.'</div>'.$js;
 }
+
+
 
 
 function ingeni_load_livewall() {
