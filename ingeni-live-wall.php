@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Ingeni Live Wall
-Version: 2023.02
+Version: 2025.01
 Plugin URI: http://ingeni.net
 Author: Bruce McKinnon - ingeni.net
 Author URI: http://ingeni.net
@@ -33,6 +33,8 @@ v2020.03 - A couple of code typos on jQuery parameters
 v2023.01 - Added large_cols, medium_cols and small_cols parameters for greater control
 		 - Added support for Woo products
 v2023.02 - Added the pool_thumbs parameter
+v2025.01 - Added the exclude_cat_ids parameter - it is a comma-seperated list of category IDs
+		 - Renamed the category parameter to cat_ids parameter - it is a comma-seperated list of category IDs
 
 */
 
@@ -74,7 +76,8 @@ function do_ingeni_livewall( $args ) {
 		'small_cols' => 1,
 		'medium_cols' => 2,
 		'large_cols' => 3,
-		'category' => '',
+		'cat_ids' => '',
+		'exclude_cat_ids' => '',
 	), $args );
 
 
@@ -158,11 +161,22 @@ function do_ingeni_livewall( $args ) {
 			'posts_per_page' => $params['pool_thumbs'],
 			'orderby' => 'rand',
 		);
-	
-		if ( $params['category'] !== '' ) {
-			array_push( $args, array ( 'category' => $params['category'] ) );
+
+		// Include these category IDs
+		if ( $params['cat_ids'] !== '' ) {
+			$cat_ary = explode(",", $params['cat_ids']);
+			$tax_query = array( 'taxonomy' => 'product_cat', 'field' => 'id', 'terms' => $cat_ary, 'operator' => 'IN' );
+			$args['tax_query'] = array( $tax_query );
 		}
 
+		// Exclude these category IDs
+		if ( $params['exclude_cat_ids'] !== '' ) {
+			$cat_ary = explode(",", $params['exclude_cat_ids']);
+			$tax_query = array( 'taxonomy' => 'product_cat', 'field' => 'id', 'terms' => $cat_ary, 'operator' => 'NOT IN' );
+			$args['tax_query'] = array( $tax_query );
+		}
+
+		//fb_log(print_r($args,true));
 
 		$products = wc_get_products( $args );
 

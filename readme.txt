@@ -4,9 +4,9 @@ Contributors: Bruce McKinnon
 Tags: live wall
 Requires at least: 4.8
 Tested up to: 5.1.1
-Stable tag: 2023.02
+Stable tag: 2025.01
 
-A live wall of logos, sourced from a common folder.
+A live wall of logos, sourced from a common folder, or Woocommerce product images
 
 
 
@@ -64,8 +64,9 @@ pool_thumbs: The size of the pool from which random images will be selected. Def
 
 small_cols, medium_cols, large_cols: Number of columns to be rendered for small, medium and large breakpoints. Defaults are 1, 2 and 3 images horizontally.
 
-category: Category from which images are chosen. Default is empty, so use all categories.
+cat_ids: Product category IDs to include. Default is empty, so all product categories are included.
 
+exclude_cat_ids: Product category IDs to exclude. Default is empty, so no product categories are excluded.
 
 
 
@@ -82,4 +83,26 @@ v2023.01 - Added large_cols, medium_cols and small_cols parameters for greater c
 	 - Added support for Woo products
 
 v2023.02 - Added the pool_thumbs parameter
+
+v2025.01 - Added the exclude_cat_ids parameter - it is a comma-seperated list of category IDs
+	 - Renamed the category parameter to cat_ids parameter - it is a comma-seperated list of category IDs
+
+
+
+== Examples ==
+
+
+Display images from a folder:
+
+[ingeni-live-wall source_path="/assets/images" max_thumbs=6 speed=4000 pool_thumbs=10 cat_ids="52,50"]
+
+
+Display product images:
+
+[ingeni-live-wall source_path="" cat_ids="52,50"]
+
+
+Display product images, but exclude product category #50 and #52 products:
+
+[ingeni-live-wall source_path="" speed=5000 exclude_cat_ids="52,50"]
 
